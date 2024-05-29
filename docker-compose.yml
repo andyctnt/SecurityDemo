@@ -4,14 +4,16 @@ services:
   nmap:
     build: .
     container_name: nmap
-    depends_on:
-      - influxdb
+    volumes:
+      - ./listado.list:/listado.list
     environment:
       - INFLUXDB_HOST=influxdb
       - INFLUXDB_PORT=8086
       - INFLUXDB_USER=nmap_user
       - INFLUXDB_PASSWORD=beonitdemo
       - INFLUXDB_DB=nmap
+    depends_on:
+      - influxdb
 
   influxdb:
     image: influxdb:latest
@@ -34,6 +36,11 @@ services:
       - "3500:3000"
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SERVER_PROTOCOL=https
+      - GF_SERVER_CERT_FILE=/etc/grafana/automate001.crt
+      - GF_SERVER_CERT_KEY=/etc/grafana/automate001.key
+      - GF_INSTALL_PLUGINS=grafana-polystat-panel,alexanderzobnin-zabbix-app # Plugins a instalar
+      - GF_SERVER_ROOT_URL=https://20.242.122.174:3000/ # URL base de Grafana
     depends_on:
       - influxdb
     volumes:
