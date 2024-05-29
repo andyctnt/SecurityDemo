@@ -13,30 +13,42 @@ influxdb_db = os.getenv('INFLUXDB_DB', 'nmap')
 
 client = InfluxDBClient(host=influxdb_host, port=influxdb_port, username=influxdb_user, password=influxdb_password, database=influxdb_db)
 
+# Función para leer las IPs del archivo listado.list
+def read_target_ips(file_path='/listado.list'):
+    with open(file_path, 'r') as file:
+        ips = [line.strip() for line in file.readlines() if line.strip()]
+    return ips
+
 # Función para ejecutar Nmap y procesar los resultados
-def run_nmap():
-    result = subprocess.run(['nmap', '-oX', '-', '192.168.1.0/24'], stdout=subprocess.PIPE)
-    xml_output = result.stdout.decode()
-    root = ET.fromstring(xml_output)
-    json_body = []
+def run_nmap(target_ips):
+    for ip in target_ips:
+        result = subprocess.run(['nmap', '-oX', '-', ip], stdout=subprocess.PIPE)
+        xml_output = result.stdout.decode()
+        root = ET.fromstring(xml_output)
+        json_body = []
 
-    for host in root.findall('host'):
-        address = host.find('address').get('addr')
-        status = host.find('status').get('state')
-        json_body.append({
-            "measurement": "nmap_scan",
-            "tags": {
-                "host": address
-            },
-            "fields": {
-                "status": status
-            }
-        })
+        for host in root.findall('host'):
+            address = host.find('address').get('addr')
+            status = host.find('status').get('state')
+            json_body.append({
+                "measurement": "nmap_scan",
+                "tags": {
+                    "host": address
+                },
+                "fields": {
+                    "status": status
+                }
+            })
 
-    if json_body:
-        client.write_points(json_body)
+        if json_body:
+            client.write_points(json_body)
 
 # Ejecutar Nmap periódicamente
-while True:
-    run_nmap()
-    time.sleep(3600)  # Ejecuta cada hora
+def main():
+    while True:
+        target_ips = read_target_ips()
+        run_nmap(target_ips)
+        time.sleep(3600)  # Ejecuta cada hora
+
+if __name__ == "__main__":
+    main()
