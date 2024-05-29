@@ -8,7 +8,7 @@ import time
 influxdb_host = os.getenv('INFLUXDB_HOST', 'localhost')
 influxdb_port = int(os.getenv('INFLUXDB_PORT', '8086'))
 influxdb_user = os.getenv('INFLUXDB_USER', 'nmap_user')
-influxdb_password = os.getenv('INFLUXDB_PASSWORD', 'yourpassword')
+influxdb_password = os.getenv('INFLUXDB_PASSWORD', 'beonitdemo')
 influxdb_db = os.getenv('INFLUXDB_DB', 'nmap')
 
 client = InfluxDBClient(host=influxdb_host, port=influxdb_port, username=influxdb_user, password=influxdb_password, database=influxdb_db)
