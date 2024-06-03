@@ -5,10 +5,10 @@ import os
 import time
 
 # Configuración de MySQL
-mysql_host = os.getenv('MYSQL_HOST', 'localhost')
+mysql_host = os.getenv('MYSQL_HOST', 'mysql')
 mysql_port = int(os.getenv('MYSQL_PORT', '3306'))
 mysql_user = os.getenv('MYSQL_USER', 'nmap_user')
-mysql_password = os.getenv('MYSQL_PASSWORD', 'yourpassword')
+mysql_password = os.getenv('MYSQL_PASSWORD', 'B3on1TD3mo')
 mysql_db = os.getenv('MYSQL_DB', 'nmap')
 
 # Conectar a la base de datos MySQL
