@@ -6,29 +6,27 @@ services:
     container_name: nmap
     volumes:
       - ./listado.list:/listado.list
-
     environment:
-      - INFLUXDB_HOST=influxdb
-      - INFLUXDB_PORT=8086
-      - INFLUXDB_USER=nmap_user
-      - INFLUXDB_PASSWORD=beonitdemo
-      - INFLUXDB_DB=nmap
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_USER=nmap_user
+      - MYSQL_PASSWORD=B3on1TD3mo
+      - MYSQL_DB=nmap
     depends_on:
-      - influxdb
+      - mysql
 
-  influxdb:
-    image: influxdb:latest
-    container_name: influxdb
+  mysql:
+    image: mysql:latest
+    container_name: mysql
     ports:
-      - "8086:8086"
+      - "3306:3306"
     environment:
-      - INFLUXDB_DB=nmap
-      - INFLUXDB_ADMIN_USER=admin
-      - INFLUXDB_ADMIN_PASSWORD=beonitdemo
-      - INFLUXDB_USER=nmap_user
-      - INFLUXDB_USER_PASSWORD=beonitdemo
+      - MYSQL_ROOT_PASSWORD=B3on1TD3mo
+      - MYSQL_DATABASE=nmap
+      - MYSQL_USER=nmap_user
+      - MYSQL_PASSWORD=B3on1TD3mo
     volumes:
-      - influxdb_data:/var/lib/influxdb
+      - mysql_data:/var/lib/mysql
 
   grafana:
     image: grafana/grafana:latest
@@ -43,12 +41,12 @@ services:
       - GF_INSTALL_PLUGINS=grafana-polystat-panel,alexanderzobnin-zabbix-app # Plugins a instalar
       - GF_SERVER_ROOT_URL=https://13.77.124.144:3000/ # URL base de Grafana
     depends_on:
-      - influxdb
+      - mysql
     volumes:
       - grafana_data:/var/lib/grafana
       - ./mycert.crt:/etc/grafana/grafana.crt
       - ./private.key:/etc/grafana/grafana.key
 
 volumes:
-  influxdb_data:
+  mysql_data:
   grafana_data:
