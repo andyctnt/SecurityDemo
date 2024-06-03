@@ -19,7 +19,7 @@ def build_nmap_image():
 def restart_docker_compose():
     try:
         print("Restarting Docker Compose services...")
-        subprocess.run(["docker-compose", "up", "--build", "-d"], check=True)
+        subprocess.run(["docker-compose", "up", "-d", "--force-recreate"], check=True)
         print("Docker Compose services restarted successfully.")
     except subprocess.CalledProcessError as e:
         print(f"Failed to restart Docker Compose services: {e}")
@@ -33,9 +33,10 @@ def start_grafana_service():
         print(f"Failed to start Grafana service: {e}")
 
 def main():
-    stop_grafana_service()
+    #stop_grafana_service()
     build_nmap_image()
     restart_docker_compose()
+    #start_grafana_service()
 
 if __name__ == "__main__":
     main()
