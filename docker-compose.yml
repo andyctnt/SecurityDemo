@@ -6,6 +6,8 @@ services:
     container_name: nmap
     volumes:
       - ./listado.list:/listado.list
+      - ./mycert.crt.crt:/etc/grafana/grafana.crt
+      - ./private.key:/etc/grafana/grafana.key
     environment:
       - INFLUXDB_HOST=influxdb
       - INFLUXDB_PORT=8086
