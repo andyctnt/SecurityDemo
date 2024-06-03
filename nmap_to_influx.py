@@ -1,17 +1,39 @@
 import subprocess
-from influxdb import InfluxDBClient
+import mysql.connector
 import xml.etree.ElementTree as ET
 import os
 import time
 
-# Configuración de InfluxDB
-influxdb_host = os.getenv('INFLUXDB_HOST', 'localhost')
-influxdb_port = int(os.getenv('INFLUXDB_PORT', '8086'))
-influxdb_user = os.getenv('INFLUXDB_USER', 'nmap_user')
-influxdb_password = os.getenv('INFLUXDB_PASSWORD', 'beonitdemo')
-influxdb_db = os.getenv('INFLUXDB_DB', 'nmap')
+# Configuración de MySQL
+mysql_host = os.getenv('MYSQL_HOST', 'localhost')
+mysql_port = int(os.getenv('MYSQL_PORT', '3306'))
+mysql_user = os.getenv('MYSQL_USER', 'nmap_user')
+mysql_password = os.getenv('MYSQL_PASSWORD', 'yourpassword')
+mysql_db = os.getenv('MYSQL_DB', 'nmap')
 
-client = InfluxDBClient(host=influxdb_host, port=influxdb_port, username=influxdb_user, password=influxdb_password, database=influxdb_db)
+# Conectar a la base de datos MySQL
+conn = mysql.connector.connect(
+    host=mysql_host,
+    user=mysql_user,
+    password=mysql_password,
+    database=mysql_db
+)
+cursor = conn.cursor()
+
+# Crear tabla si no existe
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS nmap_scan (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    host VARCHAR(255),
+    port INT,
+    protocol VARCHAR(10),
+    service VARCHAR(255),
+    service_version VARCHAR(255),
+    http_title TEXT,
+    ssl_cert TEXT,
+    scan_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+""")
 
 # Función para leer las IPs del archivo listado.list
 def read_target_ips(file_path='/listado.list'):
@@ -30,7 +52,6 @@ def run_nmap(target_ips):
         xml_output = xml_file.read()
     
     root = ET.fromstring(xml_output)
-    json_body = []
 
     for host in root.findall('host'):
         address = host.find('address').get('addr')
@@ -51,24 +72,13 @@ def run_nmap(target_ips):
                 elif script.get('id') == 'ssl-cert':
                     ssl_cert = script.get('output')
             
-            json_body.append({
-                "measurement": "nmap_scan",
-                "tags": {
-                    "host": address,
-                    "port": port_id,
-                    "protocol": protocol,
-                    "service": service_name
-                },
-                "fields": {
-                    "status": status,
-                    "service_version": service_version,
-                    "http_title": http_title,
-                    "ssl_cert": ssl_cert
-                }
-            })
-
-    if json_body:
-        client.write_points(json_body)
+            # Insertar datos en la base de datos
+            cursor.execute("""
+            INSERT INTO nmap_scan (host, port, protocol, service, service_version, http_title, ssl_cert)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (address, port_id, protocol, service_name, service_version, http_title, ssl_cert))
+    
+    conn.commit()
 
 # Ejecutar Nmap periódicamente
 def main():
@@ -79,3 +89,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+    cursor.close()
+    conn.close()
