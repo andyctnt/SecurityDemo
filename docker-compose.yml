@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   nmap:
     build: .
@@ -12,6 +10,10 @@ services:
       - MYSQL_USER=nmap_user
       - MYSQL_PASSWORD=B3on1TD3mo
       - MYSQL_DB=nmap
+
+    networks:
+      - nmap_network
+
     depends_on:
       - mysql
 
@@ -27,6 +29,8 @@ services:
       - MYSQL_PASSWORD=B3on1TD3mo
     volumes:
       - mysql_data:/var/lib/mysql
+    networks:
+      - nmap_network
 
   grafana:
     image: grafana/grafana:latest
@@ -46,7 +50,13 @@ services:
       - grafana_data:/var/lib/grafana
       - ./mycert.crt:/etc/grafana/grafana.crt
       - ./private.key:/etc/grafana/grafana.key
+    networks:
+      - nmap_network
 
 volumes:
   mysql_data:
   grafana_data:
+
+networks:
+  nmap_network:
+    driver: bridge
