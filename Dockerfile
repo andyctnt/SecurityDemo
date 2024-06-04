@@ -1,19 +1,18 @@
 # Dockerfile
-FROM alpine:latest
+FROM ubuntu:latest
 
 # Actualiza el repositorio de paquetes e instala dependencias necesarias
-RUN apk update && apk add --no-cache \
+RUN apt-get update && apt-get install -y \
     nmap \
     python3 \
-    py3-pip \
-    build-base \
+    python3-pip \
+    build-essential \
     libffi-dev \
-    openssl-dev \
+    libssl-dev \
     python3-dev \
     mysql-client \
-    mariadb-connector-c-dev \
-    py3-virtualenv \
-    bash
+    bash \
+    && apt-get clean
 
 # Crear un entorno virtual y activarlo
 RUN python3 -m venv /venv
